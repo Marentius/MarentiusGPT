@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GPT Chat API Marentius</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        main {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 100%;
+        }
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 1em;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #chat-log {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+        .message--sent {
+            background: #e1ffc7;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .message--received {
+            background: #f1f1f1;
+        }
+        .message__text {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Marentius ChatGPT4 API</h1>
+        <form id="form">
+            <input type="text" name="message" id="message" placeholder="Type your message...">
+            <button type="submit">Send</button>
+        </form>
+        <div id="chat-log"></div>
+    </main>
+    <script>
+        let messages = [];
+        const chatLog = document.getElementById('chat-log');
+        const messageInput = document.getElementById('message');
+        const form = document.getElementById('form');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const messageText = messageInput.value;
+            if (!messageText.trim()) return;
+            
+            const newMessage = { "role": "user", "content": messageText };
+            messages.push(newMessage);
+            messageInput.value = '';
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'message--sent');
+            messageElement.innerHTML = `<div class="message__text">${messageText}</div>`;
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            fetch('http://localhost:3000', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ messages })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const responseMessageElement = document.createElement('div');
+                responseMessageElement.classList.add('message', 'message--received');
+                responseMessageElement.innerHTML = `<div class="message__text">${data.message}</div>`;
+                chatLog.appendChild(responseMessageElement);
+                chatLog.scrollTop = chatLog.scrollHeight;
+
+                // Push the assistant's response to messages array
+                const assistantMessage = { "role": "assistant", "content": data.message };
+                messages.push(assistantMessage);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
