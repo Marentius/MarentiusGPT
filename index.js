@@ -1,16 +1,17 @@
 // Import dependencies
-import OpenAI from "openai";
+import { Configuration, OpenAIApi } from "openai";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Instance of OpenAI API client
-const openai = new OpenAI({
-    apiKey: "", 
-    organization: "", 
+// Use environment variables for sensitive data
+const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY, 
+    organization: process.env.OPENAI_ORG,
 });
+const openai = new OpenAIApi(configuration);
 
 const app = express();
 const port = 3000;
@@ -29,12 +30,12 @@ app.get('/', (req, res) => {
 });
 
 // Handle POST requests
-app.post("/", async (req, res) => {
+app.post("/api/gptfunction", async (req, res) => {
     const { messages } = req.body;
 
     try {
         // API call to OpenAI
-        const completion = await openai.chat.completions.create({
+        const completion = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
             messages: [
                 {"role": "system", "content": "You are Marentius' GPT, a helpful assistant for coding."},
@@ -43,7 +44,7 @@ app.post("/", async (req, res) => {
         });
 
         // Log the response from OpenAI
-        const messageContent = completion.choices[0].message.content;
+        const messageContent = completion.data.choices[0].message.content;
         console.log(messageContent);
 
         // Send the response back to the client

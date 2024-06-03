@@ -109,28 +109,30 @@
             chatLog.appendChild(messageElement);
             chatLog.scrollTop = chatLog.scrollHeight;
 
-            fetch('http://localhost:3000', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ messages })
-            })
-            .then(res => res.json())
-            .then(data => {
-                const responseMessageElement = document.createElement('div');
-                responseMessageElement.classList.add('message', 'message--received');
-                responseMessageElement.innerHTML = `<div class="message__text">${data.message}</div>`;
-                chatLog.appendChild(responseMessageElement);
-                chatLog.scrollTop = chatLog.scrollHeight;
+    // Change the fetch URL to point to the correct endpoint
+fetch('http://localhost:3000/api/gptfunction', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ messages })
+})
+.then(res => res.json())
+.then(data => {
+    const responseMessageElement = document.createElement('div');
+    responseMessageElement.classList.add('message', 'message--received');
+    responseMessageElement.innerHTML = `<div class="message__text">${data.message}</div>`;
+    chatLog.appendChild(responseMessageElement);
+    chatLog.scrollTop = chatLog.scrollHeight;
 
-                // Push the assistant's response to messages array
-                const assistantMessage = { "role": "assistant", "content": data.message };
-                messages.push(assistantMessage);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+    // Push the assistant's response to messages array
+    const assistantMessage = { "role": "assistant", "content": data.message };
+    messages.push(assistantMessage);
+})
+.catch(error => {
+    console.error('Error:', error);
+});
+
         });
     </script>
 </body>
